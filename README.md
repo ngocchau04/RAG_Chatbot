@@ -5,7 +5,7 @@ Kien truc theo SOLID, tach thanh:
 - `apps/api`: RAG API (FastAPI)
 - `packages/shared`: schema/tai lieu dung chung
 
-## Run nhanh
+## Chay local (khong Docker)
 
 ### 1) Backend
 ```bash
@@ -23,7 +23,46 @@ npm install
 npm run dev
 ```
 
-Mac dinh frontend goi `http://localhost:8000/api/v1/chat`.
+UI chay o `http://localhost:3000`.
+Frontend goi API qua `/backend/*` (Next rewrite sang `http://localhost:8000/*`).
+
+## Docker Packaging + Deploy
+
+### 1) Chuan bi env
+```bash
+cp .env.example .env
+```
+Cap nhat gia tri bat buoc trong `.env`:
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL` (mac dinh `gpt-4o-mini`)
+- `OPENAI_VECTOR_STORE_ID` (neu dung kho tai lieu co san)
+- `OPENAI_BASE_URL` (de trong neu goi truc tiep OpenAI)
+
+### 2) Build va chay
+```bash
+docker compose up -d --build
+```
+
+### 3) Kiem tra health
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/chat/openai-health
+```
+
+### 4) Truy cap
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+
+## Deploy len VPS (Ubuntu)
+
+1. Cai Docker + Docker Compose plugin tren VPS.
+2. Clone source len VPS, tao `.env`.
+3. Chay:
+```bash
+docker compose up -d --build
+```
+4. Mo firewall port `3000` (va `8000` neu can goi API truc tiep).
+5. Khuyen nghi dung reverse proxy (Nginx/Caddy) + HTTPS cho production.
 
 ## SOLID mapping
 - **S**: Use case (`AnswerQuestionUseCase`) chi chua nghiep vu hoi/dap.
@@ -34,7 +73,7 @@ Mac dinh frontend goi `http://localhost:8000/api/v1/chat`.
 
 ## Hoi truc tiep tren 1 file PDF
 
-Frontend da co nut upload PDF. Khi chon file, cau hoi se duoc gui den endpoint multipart:
+Frontend co nut upload PDF. Khi chon file, cau hoi se duoc gui den endpoint multipart:
 - `POST /api/v1/chat/file`
 - Form fields: `query` (text), `file` (pdf)
 
